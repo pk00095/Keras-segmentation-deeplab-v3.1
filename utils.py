@@ -9,35 +9,21 @@ import multiprocessing
 workers = multiprocessing.cpu_count()//2
 import tensorflow as tf
 
-if tf.__version__[0] == "2":
-    _IS_TF_2 = True
-    import tensorflow.keras.backend as K
-    from tensorflow.keras.utils import Sequence
-    from tensorflow.keras.optimizers import Adam, SGD, RMSprop
-    from tensorflow.keras.callbacks import ModelCheckpoint, ReduceLROnPlateau, EarlyStopping, LambdaCallback
-    from tensorflow.keras.layers import *
-    from subpixel import *
-    from tensorflow.keras.models import Model, Sequential
-    from tensorflow.keras.callbacks import TensorBoard
-    from tensorflow.keras.preprocessing.image import ImageDataGenerator
-    from tensorflow.python.client import device_lib
-    from tensorflow.keras.regularizers import l2
-    from tensorflow.keras.utils import to_categorical
-else:
-    _IS_TF_2 = False
-    import keras
-    import keras.backend as K
-    from keras.utils.data_utils import Sequence
-    from keras.optimizers import Adam, SGD, RMSprop
-    from keras.callbacks import ModelCheckpoint, ReduceLROnPlateau, EarlyStopping, LambdaCallback
-    from keras.layers import *
-    from subpixel import *
-    from keras.models import Model, Sequential
-    from keras.callbacks import TensorBoard
-    from keras.preprocessing.image import ImageDataGenerator
-    from tensorflow.python.client import device_lib
-    from keras.regularizers import l2
-    from keras.utils import to_categorical
+#if tf.__version__[0] == "2":
+#    _IS_TF_2 = True
+import tensorflow.keras.backend as K
+from tensorflow.keras.utils import Sequence
+from tensorflow.keras.optimizers import Adam, SGD, RMSprop
+from tensorflow.keras.callbacks import ModelCheckpoint, ReduceLROnPlateau, EarlyStopping, LambdaCallback
+from tensorflow.keras.layers import *
+from subpixel import *
+from tensorflow.keras.models import Model, Sequential
+from tensorflow.keras.callbacks import TensorBoard
+from tensorflow.keras.preprocessing.image import ImageDataGenerator
+from tensorflow.python.client import device_lib
+from tensorflow.keras.regularizers import l2
+from tensorflow.keras.utils import to_categorical
+
     
 from collections import Counter
 
@@ -126,7 +112,9 @@ def get_VOC2012_classes():
 
 def sparse_crossentropy_ignoring_last_label(y_true, y_pred):
     nb_classes = K.int_shape(y_pred)[-1]
-    y_true = K.one_hot(tf.to_int32(y_true[:,:,0]), nb_classes+1)[:,:,:-1]
+    #y_true = K.one_hot(tf.to_int32(y_true[:,:,0]), nb_classes+1)[:,:,:-1]    
+    y_true = K.one_hot(tf.squeeze(tf.dtypes.cast(y_true, tf.int32)), nb_classes+1)[:,:,:-1]
+    #y_true = to_categorical(y_true, nb_classes+1)[:,:,:-1]
     return K.categorical_crossentropy(y_true, y_pred)
 
 def sparse_accuracy_ignoring_last_label(y_true, y_pred):

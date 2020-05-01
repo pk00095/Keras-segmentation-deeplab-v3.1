@@ -1,11 +1,55 @@
 from __future__ import division
 
-from keras import backend as K
-from keras.layers import Conv2D
-import numpy as np
 import tensorflow as tf
+from tensorflow.python.ops.init_ops import _compute_fans
+from tensorflow.keras.initializers import VarianceScaling
+from tensorflow.keras import backend as K
+from tensorflow.keras.layers import Conv2D
+
+class ICNR(VarianceScaling):
+    """docstring for ICNR"""
+    def __init__(self, *args, **kwargs):
+        super(ICNR, self).__init__(*args, **kwargs)
+        #self.arg = arg
+
+    def __call__(self, shape, dtype=None, partition_info=None):
+        if dtype is None:
+          dtype = self.dtype
+        scale = self.scale
+        scale_shape = shape
+        if partition_info is not None:
+          scale_shape = partition_info.full_shape
+        fan_in, fan_out = _compute_fans(scale_shape)
+        if self.mode == "fan_in":
+          scale /= max(1., fan_in)
+        elif self.mode == "fan_out":
+          scale /= max(1., fan_out)
+        else:
+          scale /= max(1., (fan_in + fan_out) / 2.)
+        #if self.distribution == "normal" or self.distribution == "truncated_normal":
+          # constant taken from scipy.stats.truncnorm.std(a=-2, b=2, loc=0., scale=1.)
+        stddev = tf.sqrt(scale) / .87962566103423978
+
+        #if self.scale == 1:
+        if scale == 1:
+            return tf.random.truncated_normal(shape, 0.0, stddev, dtype, seed=self.seed)
+
+        #logging.info(scale)
+
+        new_shape = shape[:3] + (shape[3] // (self.scale ** 2),)
+
+        x = tf.random.truncated_normal(new_shape, 0.0, stddev, dtype, seed=self.seed)
+        x = tf.transpose(x, perm=[2, 0, 1, 3])
+        x = tf.image.resize_nearest_neighbor(x, size=(shape[0] * self.scale, shape[1] * self.scale))
+        #x = tf.space_to_depth(x, block_size=scale)
+        x = tf.space_to_depth(x, block_size=self.scale)
+        x = tf.transpose(x, perm=[1, 2, 0, 3])
+
+        return x
 
 
+
+'''
 def icnr_weights(init = tf.glorot_normal_initializer(), scale=2, shape=[3,3,32,4], dtype = tf.float32):
     sess = tf.Session()
     return sess.run(ICNR(init, scale=scale)(shape=shape, dtype=dtype))
@@ -37,7 +81,7 @@ class ICNR:
         x = tf.transpose(x, perm=[1, 2, 0, 3])
 
         return x
-
+'''
 class Subpixel(Conv2D):
     def __init__(self,
                  filters,
