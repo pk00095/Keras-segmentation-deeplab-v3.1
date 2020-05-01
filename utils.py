@@ -135,13 +135,14 @@ def Jaccard(y_true, y_pred):
         union = tf.to_int32(true_labels | pred_labels)
         legal_batches = K.sum(tf.to_int32(true_labels), axis=1)>0
         ious = K.sum(inter, axis=1)/K.sum(union, axis=1)
-        if _IS_TF_2:
-            iou.append(K.mean(ious[legal_batches]))
-        else:
-            iou.append(K.mean(tf.gather(ious, indices=tf.where(legal_batches)))) # returns average IoU of the same objects
+        #if _IS_TF_2:
+        #    iou.append(K.mean(ious[legal_batches]))
+        #else:
+        iou.append(K.mean(tf.gather(ious, indices=tf.where(legal_batches)))) # returns average IoU of the same objects
     iou = tf.stack(iou)
-    legal_labels = ~tf.math.is_nan(iou) if _IS_TF_2 else ~tf.debugging.is_nan(iou)
-    iou = iou[legal_labels] if _IS_TF_2 else tf.gather(iou, indices=tf.where(legal_labels))
+    legal_labels = ~tf.math.is_nan(iou) #if _IS_TF_2 else ~tf.debugging.is_nan(iou)
+    #iou = iou[legal_labels] if _IS_TF_2 else tf.gather(iou, indices=tf.where(legal_labels))
+    iou = tf.gather(iou, indices=tf.where(legal_labels))
     return K.mean(iou)
 
         

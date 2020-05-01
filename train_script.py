@@ -17,7 +17,7 @@ from tensorflow.keras.optimizers import Adam, SGD, RMSprop
 from tensorflow.keras.callbacks import ModelCheckpoint, ReduceLROnPlateau, EarlyStopping, LambdaCallback
 #from tensorflow.keras.layers import *
 from tensorflow.keras.layers import Reshape, Activation
-from subpixel import *
+from subpixel import ICNR, Subpixel
 from tensorflow.keras.models import Model, Sequential
 from tensorflow.keras.callbacks import TensorBoard
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
@@ -25,14 +25,14 @@ from tensorflow.python.client import device_lib
 from tensorflow.keras.regularizers import l2
 from tensorflow.keras.utils import to_categorical
 
-from utils import sparse_crossentropy_ignoring_last_label
+from utils import sparse_crossentropy_ignoring_last_label, Jaccard, sparse_accuracy_ignoring_last_label
 
 input_shape = (600, 600, 3)
 num_classes = 5
 backbone = 'xception'
 
 losses = sparse_crossentropy_ignoring_last_label
-
+metrics = {'pred_mask' : [Jaccard, sparse_accuracy_ignoring_last_label]}
 
 def get_uncompiled_model(input_shape, num_classes, backbone):
 
@@ -66,12 +66,12 @@ def get_uncompiled_model(input_shape, num_classes, backbone):
 
 model = get_uncompiled_model(input_shape, num_classes, backbone)
 
-print(model.summary())
+#print(model.summary())
 
 
 #modelpath = 'weights/{}_{}.h5'.format(backbone, net)
 #model.load_weights('weights/{}_{}.h5'.format(backbone, net))
 
 model.compile(optimizer = Adam(lr=7e-4, epsilon=1e-8, decay=1e-6), sample_weight_mode = "temporal",
-              loss = losses) #, metrics = metrics)
+              loss = losses, metrics = metrics)
     
