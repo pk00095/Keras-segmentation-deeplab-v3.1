@@ -33,15 +33,16 @@ def parse_tfrecords(filenames, height, width, num_classes, batch_size=32):
         return tf.cast(image, tf.float32), mask
     
     dataset = tf.data.TFRecordDataset(filenames=filenames)
-    dataset = dataset.map(_parse_function, num_parallel_calls=-1)
+    dataset = dataset.map(_parse_function, num_parallel_calls=4)
 
-    dataset = dataset.shuffle(buffer_size=-1)
+    dataset = dataset.shuffle(buffer_size=4)
 
     dataset = dataset.repeat(-1) # Repeat the dataset this time
     dataset = dataset.batch(batch_size)    # Batch Size
-    batch_dataset = dataset.prefetch(buffer_size=-1)
+    batch_dataset = dataset.prefetch(buffer_size=4)
 
-    iterator = batch_dataset.make_one_shot_iterator()   # Make an iterator
-    batch_features,batch_labels = iterator.get_next()  # Tensors to get next batch of image and their labels
+    #iterator = batch_dataset.make_one_shot_iterator()   # Make an iterator
+    #batch_features,batch_labels = iterator.get_next()  # Tensors to get next batch of image and their labels
     
-    return batch_features, batch_labels
+    #return batch_features, batch_labels
+    return batch_dataset

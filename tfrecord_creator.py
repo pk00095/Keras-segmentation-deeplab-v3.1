@@ -89,9 +89,9 @@ def create_tfrecords(image_dir,mask_dir,out_path):
 
 
 def main_creator():
-    out_path = '/media/segmindone/vol11/AUS-512-512-depth-train.tfrecords'
-    image_dir = '/media/segmindone/vol22/Client_Data/AUS/3D_SEG_DATA/final_orthos'
-    mask_dir = '/media/segmindone/vol22/Client_Data/AUS/3D_SEG_DATA/final_masks'
+    out_path = '/mnt/mydata/dataset/Playment_top_5_dataset/train.tfrecords'
+    image_dir = '/mnt/mydata/dataset/Playment_top_5_dataset/train_images'
+    mask_dir = '/mnt/mydata/dataset/Playment_top_5_dataset/train_masks'
 
     #assert os.path.isdir(out_dir), 'could not locate directory {}'.format(out_dir)
     assert os.path.isdir(image_dir), 'could not locate directory {}'.format(image_dir)
@@ -101,3 +101,6 @@ def main_creator():
         image_dir=image_dir,
         mask_dir=mask_dir,
         out_path=out_path)
+
+if __name__ == '__main__':
+  main_creator()

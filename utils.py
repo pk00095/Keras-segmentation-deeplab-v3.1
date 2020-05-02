@@ -112,10 +112,19 @@ def get_VOC2012_classes():
 
 def sparse_crossentropy_ignoring_last_label(y_true, y_pred):
     nb_classes = K.int_shape(y_pred)[-1]
+
+    #print(y_true.name, y_pred.name)
+
+    y_true_shape = y_true.get_shape().as_list()
+    print(y_true_shape)
+    bs, n,m, _ = y_true_shape
     #y_true = K.one_hot(tf.to_int32(y_true[:,:,0]), nb_classes+1)[:,:,:-1]    
-    y_true = K.one_hot(tf.squeeze(tf.dtypes.cast(y_true, tf.int32)), nb_classes+1)[:,:,:-1]
+    #y_true = K.one_hot(tf.squeeze(tf.dtypes.cast(y_true, tf.int32)), nb_classes+1)[:,:,:-1]
+    y_true = K.one_hot(tf.squeeze(tf.dtypes.cast(y_true, tf.int32)), nb_classes) #[:,:,:-1]
+    y_true_reshaped = tf.reshape(y_true, shape=(bs, n*m, c))
     #y_true = to_categorical(y_true, nb_classes+1)[:,:,:-1]
-    return K.categorical_crossentropy(y_true, y_pred)
+    print(y_true_reshaped.shape, y_pred.shape)
+    return K.categorical_crossentropy(y_true_reshaped, y_pred)
 
 def sparse_accuracy_ignoring_last_label(y_true, y_pred):
     nb_classes = K.int_shape(y_pred)[-1]
