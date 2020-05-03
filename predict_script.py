@@ -5,7 +5,7 @@ import numpy as np
 
 height, width, _ = input_shape
 
-model = get_uncompiled_model(input_shape, num_classes, backbone)
+model = get_uncompiled_model(input_shape, num_classes, backbone, infer=True)
 model.load_weights('/mnt/mydata/dataset/Playment_top_5_dataset/checkpoints/deeplab_top_5_classes_30.h5', by_name=True)
 print(model.summary())
 

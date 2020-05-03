@@ -129,6 +129,33 @@ def sparse_crossentropy_ignoring_last_label(y_true, y_pred):
     #print(y_true.shape, y_pred.shape)
     return K.categorical_crossentropy(y_true, y_pred)
 
+
+def categorical_focal_loss(y_true, y_pred):
+
+    #Reference https://github.com/qubvel/segmentation_models/blob/94f624b7029deb463c859efbd92fa26f512b52b8/segmentation_models/base/functional.py#L259
+
+    gamma=2.0 
+    alpha=0.25
+    #gt, pr = gather_channels(gt, pr, indexes=class_indexes, **kwargs)
+    nb_classes = K.int_shape(y_pred)[-1]
+
+    # pr: prediction 4D keras tensor (B, H, W, C) or (B, C, H, W)
+    y_pred = K.reshape(y_pred, [-1, 600, 600, n_classes])
+
+    #gt: ground truth 4D keras tensor (B, H, W, C) or (B, C, H, W)
+    y_true = K.reshape(y_true, [-1, 600, 600, n_classes])
+
+
+    # clip to prevent NaN's and Inf's
+    y_pred = K.clip(y_pred, K.epsilon(), 1.0 - K.epsilon())
+
+    # Calculate focal loss
+    loss = - y_true * (alpha * K.pow((1 - y_pred), gamma) * K.log(y_pred))
+
+    return K.mean(loss)
+
+
+
 def sparse_accuracy_ignoring_last_label(y_true, y_pred):
     nb_classes = K.int_shape(y_pred)[-1]
     y_pred = K.reshape(y_pred, (-1, nb_classes))

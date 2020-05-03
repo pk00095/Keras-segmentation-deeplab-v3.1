@@ -25,7 +25,7 @@ from tensorflow.python.client import device_lib
 from tensorflow.keras.regularizers import l2
 from tensorflow.keras.utils import to_categorical
 
-from utils import sparse_crossentropy_ignoring_last_label, Jaccard, sparse_accuracy_ignoring_last_label
+from utils import sparse_crossentropy_ignoring_last_label, Jaccard, sparse_accuracy_ignoring_last_label, categorical_focal_loss
 from tfrecord_iterator import parse_tfrecords
 
 input_shape = (600, 600, 3)
@@ -49,9 +49,9 @@ def get_callbacks(snapshot_every_epoch, snapshot_path, checkpoint_prefix):
 
     return callbacks
 
-def get_uncompiled_model(input_shape, num_classes, backbone):
+def get_uncompiled_model(input_shape, num_classes, backbone, infer=False):
 
-    model = Deeplabv3(weights=None, input_tensor=None, infer=False,
+    model = Deeplabv3(weights=None, input_tensor=None, infer=infer,
                       input_shape=input_shape, classes=num_classes,
                       backbone=backbone, OS=16, alpha=1)
 
