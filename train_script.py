@@ -90,9 +90,6 @@ if __name__ == '__main__':
 
     #print(model.summary())
 
-
-
-
     model.compile(optimizer = Adam(lr=7e-4, epsilon=1e-8, decay=1e-6), sample_weight_mode = "temporal",
                   loss = losses)#, metrics = metrics)
 
@@ -107,6 +104,7 @@ if __name__ == '__main__':
         snapshot_every_epoch=5, 
         snapshot_path='/mnt/mydata/dataset/Playment_top_5_dataset', 
         checkpoint_prefix='deeplab_top_5_classes')
+
 
     model.fit(input_function, 
         epochs=20, 

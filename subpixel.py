@@ -140,7 +140,7 @@ class Subpixel(Conv2D):
 
     def get_config(self):
         config = super(Conv2D, self).get_config()
-        config.pop('rank')
+        #config.pop('rank')
         config.pop('dilation_rate')
         config['filters']= int(config['filters'] / self.r*self.r)
         config['r'] = self.r
