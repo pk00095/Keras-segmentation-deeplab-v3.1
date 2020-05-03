@@ -102,8 +102,8 @@ input_function = parse_tfrecords(
     batch_size=2)
 
 callbacks = get_callbacks(
-    snapshot_every_epoch=5, 
-    snapshot_path='/mnt/mydata/dataset/Playment_top_5_dataset', 
+    snapshot_every_epoch=1, 
+    snapshot_path='/mnt/mydata/dataset/Playment_top_5_dataset/checkpoints', 
     checkpoint_prefix='deeplab_top_5_classes')
 
 model.fit(input_function, 
