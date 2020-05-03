@@ -86,11 +86,12 @@ def get_uncompiled_model(input_shape, num_classes, backbone, infer=False):
 if __name__ == '__main__':
 
     model = get_uncompiled_model(input_shape, num_classes, backbone)
-    model.load_weights('weights/{}_{}.h5'.format(backbone, 'subpixel'), by_name=True)
+    #model.load_weights('weights/{}_{}.h5'.format(backbone, 'subpixel'), by_name=True)
+    model.load_weights('/mnt/mydata/dataset/Playment_top_5_dataset/deeplab_top_5_classes_10.h5', by_name=True)
 
     #print(model.summary())
 
-    model.compile(optimizer = Adam(lr=7e-4, epsilon=1e-8, decay=1e-6), sample_weight_mode = "temporal",
+    model.compile(optimizer = Adam(lr=0.5e-4, epsilon=1e-8, decay=1e-6),
                   loss = losses)#, metrics = metrics)
 
     input_function = parse_tfrecords(
@@ -107,8 +108,8 @@ if __name__ == '__main__':
 
 
     model.fit(input_function, 
-        epochs=20, 
+        epochs=15, 
         steps_per_epoch=346, 
-        initial_epoch=0, 
+        initial_epoch=10, 
         callbacks=callbacks)
     
