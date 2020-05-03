@@ -125,6 +125,7 @@ def sparse_crossentropy_ignoring_last_label(y_true, y_pred):
     y_true_reshaped = tf.reshape(y_true, shape=(bs, n*m, c))
     #y_true = to_categorical(y_true, nb_classes+1)[:,:,:-1]
     '''
+    print(y_true.name, y_pred.name)
     print(y_true.shape, y_pred.shape)
     return K.categorical_crossentropy(y_true, y_pred)
 
