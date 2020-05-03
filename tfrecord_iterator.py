@@ -30,8 +30,9 @@ def parse_tfrecords(filenames, height, width, num_classes, batch_size=32):
         mask = tf.image.resize_images(mask,(height, width))
         mask.set_shape([height, width,1])
 
-        mask = tf.reshape(mask, shape=(height*width, 1))
-        mask = tf.keras.backend.one_hot(tf.squeeze(tf.dtypes.cast(mask, tf.int32)), num_classes) #[:,:,:-1]
+        #mask = tf.reshape(mask, shape=(height*width, 1))
+        mask = tf.squeeze(tf.keras.backend.one_hot(tf.dtypes.cast(mask, tf.int32),num_classes))
+        #mask = tf.keras.backend.one_hot(tf.squeeze(tf.dtypes.cast(mask, tf.int32)), num_classes) #[:,:,:-1]
 
         return tf.cast(image, tf.float32)/255 , mask
     

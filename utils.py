@@ -137,13 +137,14 @@ def categorical_focal_loss(y_true, y_pred):
     gamma=2.0 
     alpha=0.25
     #gt, pr = gather_channels(gt, pr, indexes=class_indexes, **kwargs)
-    nb_classes = K.int_shape(y_pred)[-1]
+    #n_classes = K.int_shape(y_pred)[-1]
 
     # pr: prediction 4D keras tensor (B, H, W, C) or (B, C, H, W)
-    y_pred = K.reshape(y_pred, [-1, 600, 600, n_classes])
+    #y_pred = K.reshape(y_pred, [-1, 600, 600, n_classes])
 
     #gt: ground truth 4D keras tensor (B, H, W, C) or (B, C, H, W)
-    y_true = K.reshape(y_true, [-1, 600, 600, n_classes])
+    #y_true = K.reshape(y_true, [-1, 600, 600, n_classes])
+    #tf.print(y_true.shape, y_pred.shape)
 
 
     # clip to prevent NaN's and Inf's

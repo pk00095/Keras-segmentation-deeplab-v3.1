@@ -68,7 +68,7 @@ def get_uncompiled_model(input_shape, num_classes, backbone, infer=False):
     #elif net == 'subpixel':
     x = Subpixel(num_classes, 1, scale, padding='same')(base_model.output)
     #x = Reshape((input_shape[0]*input_shape[1], -1)) (x)
-    x = Reshape((input_shape[0]*input_shape[1], num_classes)) (x)
+    #x = Reshape((input_shape[0]*input_shape[1], num_classes)) (x)
     x = Activation('softmax', name = 'pred_mask')(x)
     model = Model(base_model.input, x, name='deeplabv3p_subpixel')
 
@@ -86,13 +86,13 @@ def get_uncompiled_model(input_shape, num_classes, backbone, infer=False):
 if __name__ == '__main__':
 
     model = get_uncompiled_model(input_shape, num_classes, backbone)
-    #model.load_weights('weights/{}_{}.h5'.format(backbone, 'subpixel'), by_name=True)
-    model.load_weights('/mnt/mydata/dataset/Playment_top_5_dataset/deeplab_top_5_classes_10.h5', by_name=True)
+    model.load_weights('weights/{}_{}.h5'.format(backbone, 'subpixel'), by_name=True)
+    #model.load_weights('/mnt/mydata/dataset/Playment_top_5_dataset/deeplab_top_5_classes_10.h5', by_name=True)
 
     #print(model.summary())
 
-    model.compile(optimizer = Adam(lr=0.5e-4, epsilon=1e-8, decay=1e-6),
-                  loss = losses)#, metrics = metrics)
+    model.compile(optimizer = Adam(lr=1e-3, epsilon=1e-8, decay=1e-6),
+                  loss = categorical_focal_loss)#, metrics = metrics)
 
     input_function = parse_tfrecords(
         filenames='/mnt/mydata/dataset/Playment_top_5_dataset/test.tfrecords',
@@ -104,12 +104,12 @@ if __name__ == '__main__':
     callbacks = get_callbacks(
         snapshot_every_epoch=5, 
         snapshot_path='/mnt/mydata/dataset/Playment_top_5_dataset', 
-        checkpoint_prefix='deeplab_top_5_classes')
+        checkpoint_prefix='deeplab_top_5_classes_focal_loss')
 
 
     model.fit(input_function, 
         epochs=15, 
         steps_per_epoch=346, 
-        initial_epoch=10, 
+        initial_epoch=0, 
         callbacks=callbacks)
     
