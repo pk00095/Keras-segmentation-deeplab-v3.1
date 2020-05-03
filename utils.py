@@ -130,6 +130,20 @@ def sparse_crossentropy_ignoring_last_label(y_true, y_pred):
     return K.categorical_crossentropy(y_true, y_pred)
 
 
+def dice_coef(y_true, y_pred):
+    y_true_f = K.flatten(y_true)
+    y_pred_f = K.flatten(y_pred)
+    intersection = K.sum(y_true_f * y_pred_f)
+    return (2. * intersection + smooth) / (K.sum(y_true_f) + K.sum(y_pred_f) + smooth)
+
+def dice_coef_multilabel(y_true, y_pred):
+    dice=0
+    nb_classes = K.int_shape(y_pred)[-1]
+    for index in range(nb_classes):
+        dice -= dice_coef(y_true[:,:,:,index], y_pred[:,:,:,index])
+    return dice
+
+
 def categorical_focal_loss(y_true, y_pred):
 
     #Reference https://github.com/qubvel/segmentation_models/blob/94f624b7029deb463c859efbd92fa26f512b52b8/segmentation_models/base/functional.py#L259
