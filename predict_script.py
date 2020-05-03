@@ -21,7 +21,10 @@ image = image.astype(np.float32)
 
 prediction = model.predict(np.expand_dims(resized_image, axis=0))[0]
 #threshold here
-prediction = prediction.reshape((height, width, -1))
-perdiction = np.argmax(prediction, axis=-1)
+#prediction = prediction>0.3
+#print(prediction.shape, prediction.dtype, prediction.max(), prediction.min())
 
-print(prediction.shape, prediction.dtype, prediction.max(), prediction.min())
+prediction = prediction.reshape((height, width, -1))
+labelmap = np.argmax(prediction, axis=-1)
+
+print(labelmap.shape, labelmap.dtype, labelmap.max(), labelmap.min())
