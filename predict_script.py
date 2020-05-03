@@ -6,25 +6,35 @@ import numpy as np
 height, width, _ = input_shape
 
 model = get_uncompiled_model(input_shape, num_classes, backbone)
-model.load_weights('/mnt/mydata/dataset/Playment_top_5_dataset/checkpoints/deeplab_top_5_classes_30.h5', by_name=True)
+model.load_weights('/mnt/mydata/dataset/Playment_top_5_dataset/deeplab_top_5_classes_15.h5', by_name=True)
 print(model.summary())
 
 
 
-image_path = '/mnt/mydata/dataset/Playment_top_5_dataset/test_images/bdd_7d15b18b-1e0d6e3f.jpg'
+image_path = '/mnt/mydata/dataset/Playment_top_5_dataset/test_images/bdd_80c62ee8-96e3f3bf.jpg'
 
 image = np.array(Image.open(image_path))
 resized_image = cv2.resize(image, (width, height))
 
-image = image.astype(np.float32)
+image = image.astype(np.float32)/255
 
 
 prediction = model.predict(np.expand_dims(resized_image, axis=0))[0]
 #threshold here
 #prediction = prediction>0.3
-#print(prediction.shape, prediction.dtype, prediction.max(), prediction.min())
+prediction = prediction.astype(np.uint8)
+print(prediction.shape, prediction.dtype, prediction.max(), prediction.min())
+#labelmap_flat = np.argmax(prediction, axis=-1)
+#print(labelmap_flat.shape, labelmap_flat.dtype, labelmap_flat.max(), labelmap_flat.min())
 
-prediction = prediction.reshape((height, width, -1))
-labelmap = np.argmax(prediction, axis=-1)
+#prediction = prediction.reshape((height, width, -1))
 
-print(labelmap.shape, labelmap.dtype, labelmap.max(), labelmap.min())
+for i in range(num_classes):
+	mask_flat = prediction[:,i]
+	mask = mask_flat.reshape((height, width))
+	#mask = mask>0.5
+	#print(mask.shape, np.unique(mask), mask.max(), mask.min())
+	mask = mask.astype(np.uint8)
+	cv2.imwrite('{}.png'.format(i), mask*255)
+
+
