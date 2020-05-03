@@ -80,35 +80,37 @@ def get_uncompiled_model(input_shape, num_classes, backbone):
             #W = tf.convert_to_tensor(w, dtype=tf.float32)
             layer.set_weights([w, b])
 
-    model.load_weights('weights/{}_{}.h5'.format(backbone, 'subpixel'), by_name=True)
-
     return model
 
-model = get_uncompiled_model(input_shape, num_classes, backbone)
 
-#print(model.summary())
+if __name__ == '__main__':
+
+    model = get_uncompiled_model(input_shape, num_classes, backbone)
+    model.load_weights('weights/{}_{}.h5'.format(backbone, 'subpixel'), by_name=True)
+
+    #print(model.summary())
 
 
 
 
-model.compile(optimizer = Adam(lr=7e-4, epsilon=1e-8, decay=1e-6), sample_weight_mode = "temporal",
-              loss = losses)#, metrics = metrics)
+    model.compile(optimizer = Adam(lr=7e-4, epsilon=1e-8, decay=1e-6), sample_weight_mode = "temporal",
+                  loss = losses)#, metrics = metrics)
 
-input_function = parse_tfrecords(
-    filenames='/mnt/mydata/dataset/Playment_top_5_dataset/test.tfrecords',
-    height=600,
-    width=600,
-    num_classes=num_classes,
-    batch_size=2)
+    input_function = parse_tfrecords(
+        filenames='/mnt/mydata/dataset/Playment_top_5_dataset/test.tfrecords',
+        height=600,
+        width=600,
+        num_classes=num_classes,
+        batch_size=2)
 
-callbacks = get_callbacks(
-    snapshot_every_epoch=5, 
-    snapshot_path='/mnt/mydata/dataset/Playment_top_5_dataset', 
-    checkpoint_prefix='deeplab_top_5_classes')
+    callbacks = get_callbacks(
+        snapshot_every_epoch=5, 
+        snapshot_path='/mnt/mydata/dataset/Playment_top_5_dataset', 
+        checkpoint_prefix='deeplab_top_5_classes')
 
-model.fit(input_function, 
-    epochs=20, 
-    steps_per_epoch=346, 
-    initial_epoch=0, 
-    callbacks=callbacks)
+    model.fit(input_function, 
+        epochs=20, 
+        steps_per_epoch=346, 
+        initial_epoch=0, 
+        callbacks=callbacks)
     
