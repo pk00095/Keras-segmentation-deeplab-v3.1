@@ -438,11 +438,11 @@ def Deeplabv3(weights='pascal_voc', input_tensor=None, infer = False,
     
     x = Conv2D(classes, (1, 1), padding='same', name=last_layer_name)(x)
     x = Lambda(lambda x: tf.image.resize_bilinear(x,size=(input_shape[0],input_shape[1])))(x)
-    if infer:
-        x = Activation('softmax')(x)
-    else:
-        x = Reshape((input_shape[0]*input_shape[1], classes)) (x)
-        x = Activation('softmax')(x)
+    # if infer:
+    #     x = Activation('softmax')(x)
+    # else:
+    #     x = Reshape((input_shape[0]*input_shape[1], classes)) (x)
+    #     x = Activation('softmax')(x)
     # Ensure that the model takes into account
     # any potential predecessors of `input_tensor`.
     if input_tensor is not None:

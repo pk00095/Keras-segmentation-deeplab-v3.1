@@ -23,18 +23,18 @@ def parse_tfrecords(filenames, height, width, num_classes, batch_size=32):
         # decode the raw bytes so it becomes a tensor with type
 
         image = tf.cast(tf.image.decode_jpeg(image_string), tf.uint8)
-        image = tf.image.resize_images(image,(height, width))
+        image = tf.image.resize(image,(height, width))
         image.set_shape([height, width,3])
 
         mask = tf.cast(tf.image.decode_png(mask_string), tf.uint8)
-        mask = tf.image.resize_images(mask,(height, width))
+        mask = tf.image.resize(mask,(height, width), method='nearest')
         mask.set_shape([height, width,1])
 
         #mask = tf.reshape(mask, shape=(height*width, 1))
         mask = tf.squeeze(tf.keras.backend.one_hot(tf.dtypes.cast(mask, tf.int32),num_classes))
         #mask = tf.keras.backend.one_hot(tf.squeeze(tf.dtypes.cast(mask, tf.int32)), num_classes) #[:,:,:-1]
 
-        return tf.cast(image, tf.float32)/255 , mask
+        return tf.cast(image, tf.keras.backend.floatx())/255 , mask
     
     dataset = tf.data.TFRecordDataset(filenames=filenames)
     dataset = dataset.map(_parse_function, num_parallel_calls=4)

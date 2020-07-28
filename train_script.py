@@ -25,15 +25,15 @@ from tensorflow.python.client import device_lib
 from tensorflow.keras.regularizers import l2
 from tensorflow.keras.utils import to_categorical
 
-from utils import sparse_crossentropy_ignoring_last_label, Jaccard, sparse_accuracy_ignoring_last_label, categorical_focal_loss
+from utils import Jaccard, crossentropy_with_reshape
 from tfrecord_iterator import parse_tfrecords
 
 input_shape = (600, 600, 3)
 num_classes = 6
 backbone = 'xception'
 
-losses = sparse_crossentropy_ignoring_last_label
-metrics = {'pred_mask' : [Jaccard, sparse_accuracy_ignoring_last_label]}
+losses = crossentropy_with_reshape
+metrics = {'pred_mask' : [Jaccard]}
 
 
 def get_callbacks(snapshot_every_epoch, snapshot_path, checkpoint_prefix):
@@ -69,7 +69,7 @@ def get_uncompiled_model(input_shape, num_classes, backbone, infer=False):
     x = Subpixel(num_classes, 1, scale, padding='same')(base_model.output)
     #x = Reshape((input_shape[0]*input_shape[1], -1)) (x)
     #x = Reshape((input_shape[0]*input_shape[1], num_classes)) (x)
-    x = Activation('softmax', name = 'pred_mask')(x)
+    # x = Activation('softmax', name = 'pred_mask')(x)
     model = Model(base_model.input, x, name='deeplabv3p_subpixel')
 
     # Do ICNR
@@ -92,7 +92,7 @@ if __name__ == '__main__':
     #print(model.summary())
 
     model.compile(optimizer = Adam(lr=1e-3, epsilon=1e-8, decay=1e-6),
-                  loss = categorical_focal_loss)#, metrics = metrics)
+                  loss = crossentropy_with_reshape)#, metrics = metrics)
 
     input_function = parse_tfrecords(
         filenames='/mnt/mydata/dataset/Playment_top_5_dataset/test.tfrecords',
