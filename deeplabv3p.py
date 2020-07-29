@@ -29,7 +29,7 @@ import tensorflow as tf
 from tensorflow.keras.models import Model
 from tensorflow.keras.activations import relu
 from tensorflow.keras.layers import Layer, InputSpec, Conv2D, DepthwiseConv2D, UpSampling2D, ZeroPadding2D, Lambda, AveragePooling2D, Input, Activation, Concatenate, Add, Reshape, BatchNormalization, Dropout 
-from tensorflow.keras.utils import get_source_inputs
+from tensorflow.keras.utils import get_source_inputs, get_file
 from tensorflow.keras import backend as K
 from tensorflow.python.keras import layers
 #else:
@@ -438,6 +438,7 @@ def Deeplabv3(weights='pascal_voc', input_tensor=None, infer = False,
     
     x = Conv2D(classes, (1, 1), padding='same', name=last_layer_name)(x)
     x = Lambda(lambda x: tf.image.resize(x,size=(input_shape[0],input_shape[1])))(x)
+    # x = Activation('softmax')(x)
     # if infer:
     #     x = Activation('softmax')(x)
     # else:

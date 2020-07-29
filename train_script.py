@@ -3,8 +3,8 @@ from __future__ import print_function
 import tensorflow as tf
 # tf.enable_eager_execution()
 #will not work without eager execution
-import warnings
-warnings.filterwarnings("ignore")
+# import warnings
+# warnings.filterwarnings("ignore")
 import numpy as np
 from deeplabv3p import Deeplabv3
 import os
@@ -12,26 +12,21 @@ import os
 #if tf.__version__[0] == "2":
 #    _IS_TF_2 = True
 import tensorflow.keras.backend as K
-from tensorflow.keras.utils import Sequence
-from tensorflow.keras.optimizers import Adam, SGD, RMSprop
+# from tensorflow.keras.utils import Sequence
+from tensorflow.keras.optimizers import Adam #, SGD, RMSprop
 from tensorflow.keras.callbacks import ModelCheckpoint, ReduceLROnPlateau, EarlyStopping, LambdaCallback
 #from tensorflow.keras.layers import *
 from tensorflow.keras.layers import Reshape, Activation
+from tensorflow.keras.models import Model #, Sequential
+# from tensorflow.keras.callbacks import TensorBoard
+# from tensorflow.keras.preprocessing.image import ImageDataGenerator
+# from tensorflow.python.client import device_lib
+# from tensorflow.keras.regularizers import l2
+# from tensorflow.keras.utils import to_categorical
+
 from subpixel import ICNR, Subpixel
-from tensorflow.keras.models import Model, Sequential
-from tensorflow.keras.callbacks import TensorBoard
-from tensorflow.keras.preprocessing.image import ImageDataGenerator
-from tensorflow.python.client import device_lib
-from tensorflow.keras.regularizers import l2
-from tensorflow.keras.utils import to_categorical
-
-from utils import Jaccard, crossentropy_with_reshape
+from utils import crossentropy_with_reshape, Deeplabv3Config
 from tfrecord_iterator import parse_tfrecords
-
-input_shape = (256, 256, 3)
-num_classes = 6
-batch_size = 1
-backbone = 'xception'
 
 # losses = crossentropy_with_reshape
 # metrics = {'pred_mask' : [Jaccard]}
@@ -52,7 +47,7 @@ def get_callbacks(snapshot_every_epoch, snapshot_path, checkpoint_prefix):
 
 def get_uncompiled_model(input_shape, num_classes, backbone, infer=False):
 
-    model = Deeplabv3(weights=None, input_tensor=None, infer=infer,
+    model = Deeplabv3(weights='pascal_voc', input_tensor=None, infer=infer,
                       input_shape=input_shape, classes=num_classes,
                       backbone=backbone, OS=16, alpha=1)
 
@@ -70,7 +65,7 @@ def get_uncompiled_model(input_shape, num_classes, backbone, infer=False):
     x = Subpixel(num_classes, kernel_size=1, r=scale, kernel_initializer=ICNR(scale), padding='same')(base_model.output)
     #x = Reshape((input_shape[0]*input_shape[1], -1)) (x)
     #x = Reshape((input_shape[0]*input_shape[1], num_classes)) (x)
-    # x = Activation('softmax', name = 'pred_mask')(x)
+    x = Activation('softmax', name = 'pred_mask')(x)
     model = Model(base_model.input, x, name='deeplabv3p_subpixel')
 
     # # Do ICNR
@@ -86,7 +81,13 @@ def get_uncompiled_model(input_shape, num_classes, backbone, infer=False):
 
 if __name__ == '__main__':
 
-    model = get_uncompiled_model(input_shape, num_classes, backbone)
+    # input_shape = (256, 256, 3)
+    num_classes = 151
+    batch_size = 1
+    backbone = 'xception'
+    config = Deeplabv3Config(600, 600,16,4)
+
+    model = get_uncompiled_model(config.input_shape, num_classes, backbone)
     # model.load_weights('weights/{}_{}.h5'.format(backbone, 'subpixel'), by_name=True)
     #model.load_weights('/mnt/mydata/dataset/Playment_top_5_dataset/deeplab_top_5_classes_10.h5', by_name=True)
 
@@ -99,8 +100,8 @@ if __name__ == '__main__':
 
     input_function = parse_tfrecords(
         filenames='/home/pratik/Desktop/experiments/PLATFORM/Keras-segmentation-deeplab-v3.1/dataset/ADE20K/tfrecord/train.tfrecords',
-        height=input_shape[0],
-        width=input_shape[1],
+        height=config.height,
+        width=config.width,
         num_classes=num_classes,
         batch_size=batch_size)
 
@@ -108,7 +109,6 @@ if __name__ == '__main__':
         snapshot_every_epoch=5, 
         snapshot_path='/tmp/test_dataset', 
         checkpoint_prefix='deeplab_top_5_classes_focal_loss')
-
 
     model.fit(input_function, 
         epochs=1, 
