@@ -47,15 +47,18 @@ def create_tfrecords(image_dir,mask_dir,out_path):
     image_paths = glob.glob(os.path.join(image_dir,'*.jpg'))
     num_images = len(image_paths)
     #print(num_images)
+    unique_vals=[]
 
-    with tf.python_io.TFRecordWriter(out_path) as writer :
+    with tf.io.TFRecordWriter(out_path) as writer :
 
        for image_file in tqdm.tqdm(image_paths):
             #img = cv2.imread(path)  # -1 to read as default dat type of original image and not as uint8
             image_string = open(image_file, 'rb').read()
             image_array = np.array(Image.open(image_file))
             image_shape = image_array.shape
-            #print(image_shape)
+            if len(image_shape) !=3:
+              print('ignoring {}, shape : {}'.format(image_file, image_shape))
+              continue
 
             assert image_shape[2] == 3, 'expected image to have 3 channels but got {} instead'.format(image_shape[2])
 
@@ -70,6 +73,8 @@ def create_tfrecords(image_dir,mask_dir,out_path):
 
             mask_string = open(mask_file, 'rb').read()
             mask_array = np.array(Image.open(mask_file))
+            unique_pixels = np.unique(mask_array).tolist()
+            unique_vals = list(set(unique_vals).union(unique_pixels))
             mask_shape = mask_array.shape
 
             assert len(mask_shape) == 2, 'expected mask to have 1 channel but got {} instead'.format(mask_shape)
@@ -89,9 +94,9 @@ def create_tfrecords(image_dir,mask_dir,out_path):
 
 
 def main_creator():
-    out_path = '/mnt/mydata/dataset/Playment_top_5_dataset/train.tfrecords'
-    image_dir = '/mnt/mydata/dataset/Playment_top_5_dataset/train_images'
-    mask_dir = '/mnt/mydata/dataset/Playment_top_5_dataset/train_masks'
+    out_path = '/home/pratik/Desktop/experiments/PLATFORM/Keras-segmentation-deeplab-v3.1/dataset/ADE20K/tfrecord/train.tfrecords'
+    image_dir = '/home/pratik/Desktop/experiments/PLATFORM/Keras-segmentation-deeplab-v3.1/dataset/ADE20K/ADEChallengeData2016/images/training'
+    mask_dir = '/home/pratik/Desktop/experiments/PLATFORM/Keras-segmentation-deeplab-v3.1/dataset/ADE20K/ADEChallengeData2016/annotations/training'
 
     #assert os.path.isdir(out_dir), 'could not locate directory {}'.format(out_dir)
     assert os.path.isdir(image_dir), 'could not locate directory {}'.format(image_dir)
