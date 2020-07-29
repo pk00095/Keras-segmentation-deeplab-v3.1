@@ -87,7 +87,7 @@ def create_tfrecords(image_dir,mask_dir,out_path):
 
             writer.write(tf_example.SerializeToString())
 
-
+    print('Num unique labels :: {}'.format(len(unique_vals)))
     print ('\nWritten images and mask into {}'.format(out_path))
 
 

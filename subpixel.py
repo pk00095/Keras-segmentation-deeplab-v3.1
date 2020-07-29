@@ -2,50 +2,72 @@ from __future__ import division
 
 import tensorflow as tf
 from tensorflow.python.ops.init_ops import _compute_fans
-from tensorflow.keras.initializers import VarianceScaling
+from tensorflow.keras.initializers import Initializer
 from tensorflow.keras import backend as K
 from tensorflow.keras.layers import Conv2D
 
-class ICNR(VarianceScaling):
-    """docstring for ICNR"""
-    def __init__(self, *args, **kwargs):
-        super(ICNR, self).__init__(*args, **kwargs)
-        #self.arg = arg
 
-    def __call__(self, shape, dtype=None, partition_info=None):
-        if dtype is None:
-          dtype = self.dtype
-        scale = self.scale
-        scale_shape = shape
-        if partition_info is not None:
-          scale_shape = partition_info.full_shape
-        fan_in, fan_out = _compute_fans(scale_shape)
-        if self.mode == "fan_in":
-          scale /= max(1., fan_in)
-        elif self.mode == "fan_out":
-          scale /= max(1., fan_out)
-        else:
-          scale /= max(1., (fan_in + fan_out) / 2.)
-        #if self.distribution == "normal" or self.distribution == "truncated_normal":
-          # constant taken from scipy.stats.truncnorm.std(a=-2, b=2, loc=0., scale=1.)
-        stddev = tf.sqrt(scale) / .87962566103423978
+class ICNR(Initializer):
 
-        #if self.scale == 1:
-        if scale == 1:
-            return tf.random.truncated_normal(shape, 0.0, stddev, dtype, seed=self.seed)
+  def __init__(self, scale):
+    self.scale = scale
 
-        #logging.info(scale)
+  def __call__(self, shape, dtype=None):
+    initializer = tf.keras.initializers.GlorotNormal()
+    if self.scale == 1:
+      return initializer(shape, dtype)
+    else:
+      new_shape = shape[:3] + (shape[3] // self.scale ** 2,)
+      x = initializer(new_shape, dtype)
+      x = tf.transpose(x, perm=[2, 0, 1, 3])
+      x = tf.image.resize(x, size=(shape[0] * self.scale, shape[1] * self.scale), method='nearest')
+      x = tf.compat.v1.space_to_depth(x, block_size=self.scale)
+      x = tf.transpose(x, perm=[1, 2, 0, 3])
+      return x
 
-        new_shape = shape[:3] + (shape[3] // (self.scale ** 2),)
+  def get_config(self):  # To support serialization
+    return {"scale": self.scale}
 
-        x = tf.random.truncated_normal(new_shape, 0.0, stddev, dtype, seed=self.seed)
-        x = tf.transpose(x, perm=[2, 0, 1, 3])
-        x = tf.image.resize_nearest_neighbor(x, size=(shape[0] * self.scale, shape[1] * self.scale))
-        #x = tf.space_to_depth(x, block_size=scale)
-        x = tf.space_to_depth(x, block_size=self.scale)
-        x = tf.transpose(x, perm=[1, 2, 0, 3])
+# class ICNR(VarianceScaling):
+#     """docstring for ICNR"""
+#     def __init__(self, *args, **kwargs):
+#         super(ICNR, self).__init__(*args, **kwargs)
+#         #self.arg = arg
 
-        return x
+#     def __call__(self, shape, dtype=None, partition_info=None):
+#         if dtype is None:
+#           dtype = self.dtype
+#         scale = self.scale
+#         scale_shape = shape
+#         if partition_info is not None:
+#           scale_shape = partition_info.full_shape
+#         fan_in, fan_out = _compute_fans(scale_shape)
+#         if self.mode == "fan_in":
+#           scale /= max(1., fan_in)
+#         elif self.mode == "fan_out":
+#           scale /= max(1., fan_out)
+#         else:
+#           scale /= max(1., (fan_in + fan_out) / 2.)
+#         #if self.distribution == "normal" or self.distribution == "truncated_normal":
+#           # constant taken from scipy.stats.truncnorm.std(a=-2, b=2, loc=0., scale=1.)
+#         stddev = tf.sqrt(scale) / .87962566103423978
+
+#         #if self.scale == 1:
+#         if scale == 1:
+#             return tf.random.truncated_normal(shape, 0.0, stddev, dtype, seed=self.seed)
+
+#         #logging.info(scale)
+
+#         new_shape = shape[:3] + (shape[3] // (self.scale ** 2),)
+
+#         x = tf.random.truncated_normal(new_shape, 0.0, stddev, dtype, seed=self.seed)
+#         x = tf.transpose(x, perm=[2, 0, 1, 3])
+#         x = tf.image.resize_nearest_neighbor(x, size=(shape[0] * self.scale, shape[1] * self.scale))
+#         #x = tf.space_to_depth(x, block_size=scale)
+#         x = tf.space_to_depth(x, block_size=self.scale)
+#         x = tf.transpose(x, perm=[1, 2, 0, 3])
+
+#         return x
 
 
 

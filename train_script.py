@@ -1,7 +1,7 @@
 from __future__ import print_function
 
 import tensorflow as tf
-tf.enable_eager_execution()
+# tf.enable_eager_execution()
 #will not work without eager execution
 import warnings
 warnings.filterwarnings("ignore")
@@ -28,12 +28,13 @@ from tensorflow.keras.utils import to_categorical
 from utils import Jaccard, crossentropy_with_reshape
 from tfrecord_iterator import parse_tfrecords
 
-input_shape = (600, 600, 3)
+input_shape = (256, 256, 3)
 num_classes = 6
+batch_size = 1
 backbone = 'xception'
 
-losses = crossentropy_with_reshape
-metrics = {'pred_mask' : [Jaccard]}
+# losses = crossentropy_with_reshape
+# metrics = {'pred_mask' : [Jaccard]}
 
 
 def get_callbacks(snapshot_every_epoch, snapshot_path, checkpoint_prefix):
@@ -66,19 +67,19 @@ def get_uncompiled_model(input_shape, num_classes, backbone, infer=False):
         scale = 8
 
     #elif net == 'subpixel':
-    x = Subpixel(num_classes, 1, scale, padding='same')(base_model.output)
+    x = Subpixel(num_classes, kernel_size=1, r=scale, kernel_initializer=ICNR(scale), padding='same')(base_model.output)
     #x = Reshape((input_shape[0]*input_shape[1], -1)) (x)
     #x = Reshape((input_shape[0]*input_shape[1], num_classes)) (x)
     # x = Activation('softmax', name = 'pred_mask')(x)
     model = Model(base_model.input, x, name='deeplabv3p_subpixel')
 
-    # Do ICNR
-    for layer in model.layers:
-        if type(layer) == Subpixel:
-            c, b = layer.get_weights()
-            w = ICNR(scale=scale)(shape=c.shape)
-            #W = tf.convert_to_tensor(w, dtype=tf.float32)
-            layer.set_weights([w, b])
+    # # Do ICNR
+    # for layer in model.layers:
+    #     if type(layer) == Subpixel:
+    #         c, b = layer.get_weights()
+    #         w = ICNR(scale=scale)(shape=c.shape)
+    #         #W = tf.convert_to_tensor(w, dtype=tf.float32)
+    #         layer.set_weights([w, b])
 
     return model
 
@@ -86,7 +87,7 @@ def get_uncompiled_model(input_shape, num_classes, backbone, infer=False):
 if __name__ == '__main__':
 
     model = get_uncompiled_model(input_shape, num_classes, backbone)
-    model.load_weights('weights/{}_{}.h5'.format(backbone, 'subpixel'), by_name=True)
+    # model.load_weights('weights/{}_{}.h5'.format(backbone, 'subpixel'), by_name=True)
     #model.load_weights('/mnt/mydata/dataset/Playment_top_5_dataset/deeplab_top_5_classes_10.h5', by_name=True)
 
     #print(model.summary())
@@ -94,22 +95,24 @@ if __name__ == '__main__':
     model.compile(optimizer = Adam(lr=1e-3, epsilon=1e-8, decay=1e-6),
                   loss = crossentropy_with_reshape)#, metrics = metrics)
 
+    exit()
+
     input_function = parse_tfrecords(
-        filenames='/mnt/mydata/dataset/Playment_top_5_dataset/test.tfrecords',
+        filenames='/home/pratik/Desktop/experiments/PLATFORM/Keras-segmentation-deeplab-v3.1/dataset/ADE20K/tfrecord/train.tfrecords',
         height=600,
         width=600,
         num_classes=num_classes,
-        batch_size=2)
+        batch_size=batch_size)
 
     callbacks = get_callbacks(
         snapshot_every_epoch=5, 
-        snapshot_path='/mnt/mydata/dataset/Playment_top_5_dataset', 
+        snapshot_path='/tmp/test_dataset', 
         checkpoint_prefix='deeplab_top_5_classes_focal_loss')
 
 
     model.fit(input_function, 
-        epochs=15, 
-        steps_per_epoch=346, 
-        initial_epoch=0, 
-        callbacks=callbacks)
+        epochs=1, 
+        steps_per_epoch=2,)
+        # initial_epoch=0, 
+        # callbacks=callbacks)
     
