@@ -5,16 +5,16 @@ def parse_tfrecords(filenames, height, width, num_classes, batch_size=32):
 
     def _parse_function(serialized):
         features = {
-        'image/height': tf.FixedLenFeature([], tf.int64),
-        'image/width': tf.FixedLenFeature([], tf.int64),
-        'image/depth': tf.FixedLenFeature([], tf.int64),
-        'image_raw': tf.FixedLenFeature([], tf.string),
-        'mask/height': tf.FixedLenFeature([], tf.int64),
-        'mask/width': tf.FixedLenFeature([], tf.int64),
-        'mask/depth': tf.FixedLenFeature([], tf.int64),
-        'mask_raw': tf.FixedLenFeature([], tf.string)
+        'image/height': tf.io.FixedLenFeature([], tf.int64),
+        'image/width': tf.io.FixedLenFeature([], tf.int64),
+        'image/depth': tf.io.FixedLenFeature([], tf.int64),
+        'image_raw': tf.io.FixedLenFeature([], tf.string),
+        'mask/height': tf.io.FixedLenFeature([], tf.int64),
+        'mask/width': tf.io.FixedLenFeature([], tf.int64),
+        'mask/depth': tf.io.FixedLenFeature([], tf.int64),
+        'mask_raw': tf.io.FixedLenFeature([], tf.string)
         }
-        parsed_example = tf.parse_single_example(serialized=serialized, features=features)
+        parsed_example = tf.io.parse_single_example(serialized=serialized, features=features)
 
         image_string = parsed_example['image_raw']
         mask_string = parsed_example['mask_raw']

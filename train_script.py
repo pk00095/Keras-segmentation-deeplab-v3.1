@@ -95,12 +95,12 @@ if __name__ == '__main__':
     model.compile(optimizer = Adam(lr=1e-3, epsilon=1e-8, decay=1e-6),
                   loss = crossentropy_with_reshape)#, metrics = metrics)
 
-    exit()
+    # exit()
 
     input_function = parse_tfrecords(
         filenames='/home/pratik/Desktop/experiments/PLATFORM/Keras-segmentation-deeplab-v3.1/dataset/ADE20K/tfrecord/train.tfrecords',
-        height=600,
-        width=600,
+        height=input_shape[0],
+        width=input_shape[1],
         num_classes=num_classes,
         batch_size=batch_size)
 
