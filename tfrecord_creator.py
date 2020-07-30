@@ -94,9 +94,9 @@ def create_tfrecords(image_dir,mask_dir,out_path):
 
 
 def main_creator():
-    out_path = '/home/pratik/Desktop/experiments/PLATFORM/Keras-segmentation-deeplab-v3.1/dataset/ADE20K/tfrecord/train.tfrecords'
-    image_dir = '/home/pratik/Desktop/experiments/PLATFORM/Keras-segmentation-deeplab-v3.1/dataset/ADE20K/ADEChallengeData2016/images/training'
-    mask_dir = '/home/pratik/Desktop/experiments/PLATFORM/Keras-segmentation-deeplab-v3.1/dataset/ADE20K/ADEChallengeData2016/annotations/training'
+    out_path = '/home/pratik/Desktop/experiments/PLATFORM/Keras-segmentation-deeplab-v3.1/dataset/ADE20K/tfrecord/test.tfrecords'
+    image_dir = '/home/pratik/Desktop/experiments/PLATFORM/Keras-segmentation-deeplab-v3.1/dataset/ADE20K/ADEChallengeData2016/images/validation'
+    mask_dir = '/home/pratik/Desktop/experiments/PLATFORM/Keras-segmentation-deeplab-v3.1/dataset/ADE20K/ADEChallengeData2016/annotations/validation'
 
     #assert os.path.isdir(out_dir), 'could not locate directory {}'.format(out_dir)
     assert os.path.isdir(image_dir), 'could not locate directory {}'.format(image_dir)
